@@ -7,16 +7,16 @@ from app.models import AnalyzeRequest, AnalyzeResponse
 
 GROQ_MODEL = "llama-3.1-8b-instant"
 
-SYSTEM_PROMPT = """You are a phishing detection expert analyzing emails. Respond ONLY with valid JSON:
+SYSTEM_PROMPT = """You are an email security expert. Analyze the email and respond ONLY with valid JSON:
 {"is_phishing":bool,"confidence":0.0-1.0,"risk_level":"low"|"medium"|"high"|"critical","reasons":["..."],"recommendation":"..."}
 
-Analyze these signals:
-- Sender email domain vs display name mismatch (e.g. "PayPal Support" from randomdomain.com)
-- Links where display text differs from actual URL (format: "display text → actual URL")
-- Typosquatting or brand impersonation in URL/domain
-- Urgency or scare language ("verify now", "account suspended", "act immediately")
-- Requests for credentials, payment, or personal info
-- Missing HTTPS, IP addresses as domains, suspicious TLDs"""
+Rules for reasons:
+- Be SPECIFIC — name the actual sender, domain, subject, or link you found suspicious or safe
+- Each reason should reference concrete evidence from the email (e.g. "Sender 'support@paypa1.com' misspells paypal.com")
+- Check: sender domain vs display name, link destinations vs display text, urgency/threats, credential requests
+- For safe emails: state WHY it looks legitimate (e.g. "Sender domain glassdoor.com matches company name in display")
+- List 3-5 specific findings, not generic statements
+- Keep each reason under 15 words"""
 
 _SUSPICIOUS_TLDS = {".xyz", ".tk", ".ml", ".ga", ".cf", ".gq", ".top", ".click", ".online", ".site"}
 _BRANDS = ["paypal", "amazon", "google", "microsoft", "apple", "netflix", "facebook",
