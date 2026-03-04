@@ -20,7 +20,7 @@ app = FastAPI(title="PhishGuard API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "change-me"))
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
+    allow_origins=["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

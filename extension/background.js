@@ -1,5 +1,5 @@
 // PhishGuard background service worker
-let API_BASE = "https://phishguard-api.onrender.com"; // update after deploy
+let API_BASE = "https://phishguard-0nal.onrender.com"; // update after deploy
 
 const tabResults  = {};  // tabId → latest result
 const tabPending  = {};  // tabId → bool (AI in flight)
@@ -17,10 +17,18 @@ function getApiBase() {
 // ── Receive email payload from content script ─────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender) => {
-  if (message.type !== "ANALYZE_EMAIL") return;
-
   const tabId = sender.tab?.id;
   if (!tabId) return;
+
+  if (message.type === "CLEAR_EMAIL") {
+    tabResults[tabId]  = null;
+    tabPending[tabId]  = false;
+    tabPayloads[tabId] = null;
+    chrome.action.setBadgeText({ tabId, text: "" });
+    return;
+  }
+
+  if (message.type !== "ANALYZE_EMAIL") return;
 
   const payload = message.payload;
   tabPayloads[tabId] = payload;

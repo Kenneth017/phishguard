@@ -67,10 +67,15 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Trigger on hash change (user clicks different email)
+    // Trigger on hash change (user clicks different email or goes back to inbox)
     window.addEventListener("hashchange", () => {
       clearTimeout(debounce);
       lastMessageId = null;
+      if (!isEmailOpen()) {
+        // Back to inbox — clear result immediately
+        chrome.runtime.sendMessage({ type: "CLEAR_EMAIL" });
+        return;
+      }
       debounce = setTimeout(tryExtract, 1500);
     });
   }

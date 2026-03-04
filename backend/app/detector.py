@@ -2,7 +2,7 @@ import os
 import re
 import json
 from urllib.parse import urlparse
-from groq import Groq
+from groq import AsyncGroq
 from app.models import AnalyzeRequest, AnalyzeResponse
 
 GROQ_MODEL = "llama-3.1-8b-instant"
@@ -121,8 +121,8 @@ def build_prompt(req: AnalyzeRequest) -> str:
 
 async def ai_analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     """AI analysis via Groq — ~1s response time."""
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    response = client.chat.completions.create(
+    client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+    response = await client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
