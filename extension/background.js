@@ -107,6 +107,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// ── Keep Render server warm (ping every 14 min to prevent cold start) ────────
+
+function pingServer() {
+  fetch(`${API_BASE}/health`).catch(() => {});
+}
+pingServer();
+setInterval(pingServer, 14 * 60 * 1000);
+
 // ── Clean up on tab close ─────────────────────────────────────────────────
 
 chrome.tabs.onRemoved.addListener((tabId) => {

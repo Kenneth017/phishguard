@@ -5,7 +5,7 @@ function render(result, pending) {
     main.innerHTML = pending
       ? `<div class="status-msg">Analyzing email...</div>`
       : `<div class="status-msg">Open an email to analyze it.</div>`;
-    if (pending) setTimeout(poll, 2000);
+    if (pending) setTimeout(poll, 1000);
     return;
   }
 
@@ -38,7 +38,7 @@ function render(result, pending) {
     </div>
   `;
 
-  if (result._refining || pending) setTimeout(poll, 2000);
+  if (result._refining || pending) setTimeout(poll, 1000);
 }
 
 function poll() {
