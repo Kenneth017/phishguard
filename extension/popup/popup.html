@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { width: 340px; background: #0f172a; color: #f1f5f9; }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid #1e293b;
+    }
+    .header h1 { font-size: 17px; font-weight: 700; color: #38bdf8; }
+    .header span { font-size: 11px; color: #475569; }
+
+    .section { padding: 14px 16px; border-bottom: 1px solid #1e293b; }
+
+    .risk-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .risk-badge {
+      padding: 4px 14px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .risk-low      { background: #14532d; color: #4ade80; }
+    .risk-medium   { background: #78350f; color: #fbbf24; }
+    .risk-high     { background: #7f1d1d; color: #f87171; }
+    .risk-critical { background: #450a0a; color: #fca5a5; }
+
+    .confidence { font-size: 12px; color: #64748b; }
+
+    .reasons { list-style: none; margin-top: 10px; }
+    .reasons li {
+      font-size: 12px; color: #cbd5e1;
+      padding: 5px 0; border-top: 1px solid #1e293b;
+    }
+    .reasons li::before { content: "• "; color: #38bdf8; }
+
+    .recommendation {
+      font-size: 13px; color: #e2e8f0; line-height: 1.5; margin-top: 10px;
+    }
+
+    .meta { font-size: 11px; color: #334155; margin-top: 8px; }
+    .refining { font-size: 11px; color: #f59e0b; margin-top: 4px; }
+
+    .status-msg { padding: 32px 16px; text-align: center; font-size: 13px; color: #475569; }
+
+    /* Report section */
+    .report-section { padding: 12px 16px; }
+    .report-section p { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+    .report-section input {
+      width: 100%; padding: 8px 10px; background: #1e293b;
+      border: 1px solid #334155; border-radius: 6px;
+      color: #e2e8f0; font-size: 13px; margin-bottom: 8px;
+    }
+    .report-btn {
+      width: 100%; padding: 9px; border: none; border-radius: 6px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      background: #7f1d1d; color: #fca5a5;
+    }
+    .report-btn:hover { background: #991b1b; }
+    .report-btn:disabled { opacity: 0.5; cursor: default; }
+    .report-success { font-size: 12px; color: #4ade80; text-align: center; padding: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>PhishGuard</h1>
+    <span>Email Phishing Detector</span>
+  </div>
+
+  <div id="main"><div class="status-msg">Open an email to analyze it.</div></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

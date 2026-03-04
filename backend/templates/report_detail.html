@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+    <a href="/console" style="color:#64748b; font-size:13px;">← Back</a>
+    <h1 style="font-size:20px;">Report #{{ report.id }}</h1>
+    <span class="badge badge-{{ report.status }}">{{ report.status }}</span>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+    <!-- Email details -->
+    <div>
+      <div class="card">
+        <h2>Email Details</h2>
+        <table style="font-size:13px;">
+          <tr><th style="width:110px; color:#64748b;">Reported</th><td>{{ report.created_at[:16] }}</td></tr>
+          <tr><th style="color:#64748b;">Sender</th><td>{{ report.sender or "—" }}</td></tr>
+          <tr><th style="color:#64748b;">Subject</th><td>{{ report.subject or "—" }}</td></tr>
+          <tr><th style="color:#64748b;">Reporter</th><td>{{ report.reporter_email or "—" }}</td></tr>
+          <tr><th style="color:#64748b;">URL</th><td style="word-break:break-all; font-size:11px;">{{ report.url }}</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2>Email Body</h2>
+        <pre style="font-size:12px; color:#cbd5e1; white-space:pre-wrap; max-height:300px; overflow:auto;">{{ report.body_text or "—" }}</pre>
+      </div>
+
+      {% if report.links %}
+      <div class="card">
+        <h2>Links in Email</h2>
+        <ul style="font-size:12px; color:#94a3b8; list-style:none;">
+          {% for link in report.links %}
+          <li style="padding:4px 0; border-bottom:1px solid #334155; word-break:break-all;">{{ link }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Analysis + actions -->
+    <div>
+      <!-- Initial analysis -->
+      <div class="card">
+        <h2>Initial Analysis</h2>
+        {% set a = report.analysis %}
+        {% if a %}
+          <span class="badge badge-{{ a.get('risk_level','unknown') }}" style="margin-bottom:10px; display:inline-block;">
+            {{ a.get('risk_level','?') }} risk
+          </span>
+          <div style="font-size:12px; color:#94a3b8; margin-bottom:8px;">
+            Confidence: {{ (a.get('confidence',0)*100)|int }}% &nbsp;|&nbsp; {{ a.get('model_used','') }}
+          </div>
+          <ul style="font-size:13px; list-style:none;">
+            {% for r in a.get('reasons',[]) %}
+            <li style="padding:3px 0; color:#cbd5e1;">• {{ r }}</li>
+            {% endfor %}
+          </ul>
+          <p style="margin-top:10px; font-size:13px; color:#e2e8f0;">{{ a.get('recommendation','') }}</p>
+        {% else %}
+          <p style="color:#64748b;">No analysis data.</p>
+        {% endif %}
+      </div>
+
+      <!-- Deep AI analysis -->
+      <div class="card">
+        <h2>Deep AI Analysis</h2>
+        <button class="btn btn-primary" id="deepBtn" onclick="deepAnalyze()">Run Deep Analysis</button>
+        <div id="deepResult" style="margin-top:14px; font-size:13px;"></div>
+      </div>
+
+      <!-- Update status -->
+      <div class="card">
+        <h2>Update Status</h2>
+        <form method="POST" action="/console/report/{{ report.id }}/update">
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="pending"  {% if report.status=='pending'  %}selected{% endif %}>Pending</option>
+              <option value="reviewed" {% if report.status=='reviewed' %}selected{% endif %}>Reviewed</option>
+              <option value="resolved" {% if report.status=='resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Admin Notes</label>
+            <textarea name="admin_notes">{{ report.admin_notes or "" }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+      </div>
+
+      <!-- Send feedback -->
+      {% if report.reporter_email %}
+      <div class="card">
+        <h2>Send Feedback to Reporter</h2>
+        {% if report.feedback_sent_at %}
+        <p style="font-size:13px; color:#4ade80; margin-bottom:12px;">
+          ✓ Feedback sent at {{ report.feedback_sent_at[:16] }}
+        </p>
+        {% endif %}
+        <form method="POST" action="/console/report/{{ report.id }}/send-feedback">
+          <div class="form-group">
+            <label>Message</label>
+            <textarea name="feedback_message" placeholder="Write feedback to {{ report.reporter_email }}...">Thank you for reporting this email to PhishGuard. We have reviewed your report and confirmed it as a phishing attempt. Please delete the email and do not click any links within it.</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Send Email</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+async function deepAnalyze() {
+  const btn = document.getElementById("deepBtn");
+  const out = document.getElementById("deepResult");
+  btn.disabled = true;
+  btn.textContent = "Analyzing...";
+  out.innerHTML = '<span style="color:#64748b;">Running AI analysis...</span>';
+
+  try {
+    const res = await fetch("/console/report/{{ report.id }}/deep-analyze", { method: "POST" });
+    const data = await res.json();
+    const riskColors = { low:"#4ade80", medium:"#fbbf24", high:"#f87171", critical:"#fca5a5" };
+    const color = riskColors[data.risk_level] || "#e2e8f0";
+    out.innerHTML = `
+      <div style="color:${color}; font-weight:700; font-size:15px; margin-bottom:8px;">
+        ${data.risk_level.toUpperCase()} — ${Math.round(data.confidence*100)}% confidence
+      </div>
+      <ul style="list-style:none; margin-bottom:10px;">
+        ${data.reasons.map(r => `<li style="padding:2px 0; color:#cbd5e1;">• ${r}</li>`).join("")}
+      </ul>
+      <p style="color:#e2e8f0;">${data.recommendation}</p>
+      <p style="color:#475569; font-size:11px; margin-top:6px;">via ${data.model_used}</p>
+    `;
+  } catch (e) {
+    out.innerHTML = '<span style="color:#f87171;">Analysis failed. Check API key.</span>';
+  }
+  btn.disabled = false;
+  btn.textContent = "Run Again";
+}
+</script>
+{% endblock %}

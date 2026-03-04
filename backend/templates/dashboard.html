@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+    <h1 style="font-size:22px;">Reported Emails</h1>
+    <div style="display:flex; gap:8px; font-size:13px;">
+      <a href="/console" class="btn btn-ghost {% if not filter %}btn-primary{% endif %}">All ({{ counts.all }})</a>
+      <a href="/console?status=pending"  class="btn btn-ghost {% if filter=='pending' %}btn-primary{% endif %}">Pending ({{ counts.pending }})</a>
+      <a href="/console?status=reviewed" class="btn btn-ghost {% if filter=='reviewed' %}btn-primary{% endif %}">Reviewed ({{ counts.reviewed }})</a>
+      <a href="/console?status=resolved" class="btn btn-ghost {% if filter=='resolved' %}btn-primary{% endif %}">Resolved ({{ counts.resolved }})</a>
+    </div>
+  </div>
+
+  {% if reports %}
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Date</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Risk</th>
+          <th>Status</th>
+          <th>Reporter</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reports %}
+        <tr>
+          <td style="color:#64748b;">{{ r.id }}</td>
+          <td style="color:#94a3b8; white-space:nowrap;">{{ r.created_at[:16] }}</td>
+          <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            {{ r.sender or "—" }}
+          </td>
+          <td style="max-width:240px;">{{ r.subject or "—" }}</td>
+          <td>
+            {% set risk = r.analysis.get("risk_level", "unknown") %}
+            <span class="badge badge-{{ risk }}">{{ risk }}</span>
+          </td>
+          <td><span class="badge badge-{{ r.status }}">{{ r.status }}</span></td>
+          <td style="color:#94a3b8;">{{ r.reporter_email or "—" }}</td>
+          <td><a href="/console/report/{{ r.id }}" class="btn btn-ghost" style="padding:4px 10px;">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center; color:#64748b; padding:48px;">
+    No reports yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
